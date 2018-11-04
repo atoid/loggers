@@ -1,0 +1,11 @@
+28.1D40CC020000/temperature
+28.5B6FCC020000/temperature
+28.7649CC020000/temperature
+28.933FCC020000/temperature
+28.AD3ACC020000/temperature
+28.BC42CC020000/temperature
+28.BD4CCC020000/temperature
+28.CB73CC020000/temperature
+28.D474CC020000/temperature
+20.571A0C000000/volt.A
+20.571A0C000000/volt.B

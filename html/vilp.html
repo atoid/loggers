@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>VILP</title>
+
+</head>
+
+<body>
+
+<script src="jquery.min.js"></script>
+
+<script>
+
+$(document).ready(function() {
+	onload();
+});
+
+var refreshAngle = 0;
+var fanSpeed = 0;
+var fanBrake = 0;
+var fanAngle = 0;
+var vilpStatus;
+
+function onload()
+{
+	var c = document.getElementById("vilp");
+	var ctx = c.getContext("2d");
+
+	ctx.font = "30px Arial";
+	ctx.strokeStyle = "#000";
+	ctx.lineWidth = 2;
+	
+	// Tank
+	roundRect(ctx, 280, 10, 140, 300, 10);
+
+	for (var i = 0; i < 7; i++)
+	{
+		ctx.beginPath();
+		ctx.arc(290 + 20*i, 60, 10, 0, 180 * Math.PI / 180);
+		ctx.stroke();
+	}
+	
+	// VILP
+	roundRect(ctx, 10, 160, 200, 150, 10);
+
+	ctx.beginPath();
+	ctx.arc(85, 235, 60, 0, 360 * Math.PI / 180);
+	ctx.stroke();
+	
+	// Pipes
+	ctx.strokeStyle = "#f00";
+	ctx.beginPath();
+	ctx.moveTo(210, 200);
+	ctx.lineTo(280, 200);
+	ctx.stroke();
+
+	ctx.beginPath();
+	ctx.strokeStyle = "#00f";
+	ctx.moveTo(210, 250);
+	ctx.lineTo(280, 250);
+	ctx.stroke();
+	
+	ctx.fillStyle = "#000";
+	ctx.fillText("VILP status", 10, 30);
+			
+	getStatus(ctx);
+		
+	setInterval( function() {
+	    resetRefresh(ctx);
+		getStatus(ctx);
+	}, 1000 * 30);
+
+	setInterval( function() {
+				strokeFan(ctx);
+			}, 20);
+
+	setInterval( function() {
+				strokeRefresh(ctx);
+			}, 1000);
+
+	setInterval( function() {
+    			var d = new Date();
+    			$("#4h").attr("src", "temps_4h.png?"+d.getTime());
+    			$("#24h").attr("src", "temps_24h.png?"+d.getTime());
+			}, 1000*60*2);
+}
+
+function getStatus(ctx)
+{
+	$.get("http://192.168.1.191/cgi-bin/pyvilp.cgi", function(data) {
+		vilpStatus = data;
+
+		if (vilpStatus.state == "run" && vilpStatus.alive)
+		{
+			fanSpeed = 5;
+			fanBrake = 0.0;
+		}
+		else
+		{
+			fanBrake = 0.2;
+		}
+
+		strokeRuntime(ctx);
+		strokePower(ctx);
+        strokeTemps(ctx);
+	});
+}
+
+function resetRefresh(ctx)
+{
+	refreshAngle = 0;
+}
+
+function strokeRefresh(ctx)
+{	
+	refreshAngle += 12;
+}
+
+function strokeTemps(ctx)
+{
+	ctx.font = "30px Arial";
+	ctx.fillStyle = "#fff";
+
+	ctx.fillRect(315, 125, 70, -30);
+	ctx.fillRect(75, 125, 70, -30);
+	ctx.fillRect(225, 195, 50, -30);
+	ctx.fillRect(225, 245, 50, -30);
+
+	ctx.fillStyle = "#f00";
+	ctx.fillText(vilpStatus.temps.tank.toFixed(1), 320, 120);
+
+	ctx.fillStyle = "#00f";
+	ctx.fillText(vilpStatus.temps.out.toFixed(1), 80, 120);
+
+	ctx.font = "20px Arial";
+	ctx.fillStyle = "#f00";
+	ctx.fillText(vilpStatus.temps.gas.toFixed(1), 230, 190);
+
+	ctx.fillStyle = "#00f";
+	ctx.fillText(vilpStatus.temps.liq.toFixed(1), 230, 240);
+}
+
+function strokeRuntime(ctx)
+{
+	ctx.font = "20px Arial";
+	ctx.fillStyle = "#fff";
+	ctx.fillRect(150, 195, 55, -30);
+
+	ctx.fillStyle = "#000";
+	ctx.fillText(vilpStatus.runtime ? vilpStatus.runtime : "N/A", 155, 190);
+}
+
+function strokePower(ctx)
+{
+    var power;
+    if (vilpStatus.power)
+    {
+        power = vilpStatus.power;
+        if (power > 1000)
+        {
+            power = undefined;
+        }
+
+        if (power < 650)
+        {
+            power = undefined;
+        }
+
+        if (vilpStatus.state == "idle")
+        {
+            power = (vilpStatus.kwh_pulses_end - vilpStatus.kwh_pulses_start) / 1000;
+        }
+    }
+
+    if (power !== undefined)
+    {
+        ctx.font = "20px Arial";
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(150, 295, 58, -30);
+
+        ctx.fillStyle = "#000";
+        ctx.fillText(power, 155, 290);
+    }
+}
+
+function strokeFan(ctx)
+{
+	var d = fanAngle;
+
+	// Fan
+	ctx.strokeStyle = "#000";
+	ctx.fillStyle = "#fff";
+
+	ctx.fillRect(20, 170, 135, 135);
+
+	// Blades
+	ctx.beginPath();
+	ctx.moveTo(85, 235);
+	ctx.arc(85, 235, 55,   (d+0) * Math.PI / 180,  (d+60) * Math.PI / 180);
+	ctx.lineTo(85, 235);
+	ctx.arc(85, 235, 55, (d+120) * Math.PI / 180, (d+180) * Math.PI / 180);
+	ctx.lineTo(85, 235);
+	ctx.arc(85, 235, 55, (d+240) * Math.PI / 180, (d+300) * Math.PI / 180);
+	ctx.lineTo(85, 235);
+	ctx.stroke();
+
+	// Circle
+	ctx.beginPath();
+	ctx.arc(85, 235, 60, 0, 360 * Math.PI / 180);
+	ctx.stroke();
+	
+	// Refresher
+	if (vilpStatus && (vilpStatus.state == "alarm" || !vilpStatus.alive))
+	{
+		ctx.strokeStyle = "#f00";
+	}
+
+	ctx.beginPath();
+	ctx.arc(85, 235, 63, 0, refreshAngle * Math.PI / 180);
+	ctx.stroke();
+
+	if (fanSpeed > 0)
+	{
+		fanAngle += fanSpeed;
+		fanSpeed -= fanBrake;
+	}
+}
+
+// code from stackoverflow
+function roundRect(ctx, x, y, width, height, radius, fill, stroke)
+{
+	if (typeof stroke == "undefined" ) {
+		stroke = true;
+	}
+	if (typeof radius === "undefined") {
+		radius = 5;
+	}
+	ctx.beginPath();
+	ctx.moveTo(x + radius, y);
+	ctx.lineTo(x + width - radius, y);
+	ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+	ctx.lineTo(x + width, y + height - radius);
+	ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+	ctx.lineTo(x + radius, y + height);
+	ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+	ctx.lineTo(x, y + radius);
+	ctx.quadraticCurveTo(x, y, x + radius, y);
+	ctx.closePath();
+	if (stroke) {
+		ctx.stroke();
+	}
+	if (fill) {
+		ctx.fill();
+	}        
+}
+
+</script>
+
+<canvas id="vilp" width="500" height="360"></canvas>
+
+<br>
+<img id="4h" src="temps_4h.png">
+<br>
+<img id="24h" src="temps_24h.png">
+<br>
+
+</body>
+</html>

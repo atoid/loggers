@@ -1,0 +1,53 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+<title>Vallox 110 SE seuranta</title>
+</head>
+
+<!--81678/307142-->
+
+<body>
+
+<script type="text/javascript">
+
+var img = 0;
+
+function findObject(name)
+{
+    return document.getElementById(name);
+}
+
+function onImgClick()
+{
+  var o1 = findObject("kuva1");
+  var o2 = findObject("kuva2");
+  var o3 = findObject("kuva3");
+
+  if (img == 0)
+  {
+    o1.src = "temps_m.png";
+    o2.src = "kwh_m.png";
+    o3.src = "rh_m.png";
+    img = 1;
+  }
+  else
+  {
+    o1.src = "temps.png";
+    o2.src = "kwh.png";
+    o3.src = "rh.png";
+    img = 0;
+  }
+}
+
+</script>
+
+<b>Vallox 110 SE seuranta</b> - klikkaa kuvia päivä / kk näkymän vaihtamiseksi.
+<br>
+<br>
+
+<img src="temps.png" id="kuva1" onclick="onImgClick()" />
+<img src="kwh.png" id="kuva2" onclick="onImgClick()" />
+<img src="rh.png" id="kuva3" onclick="onImgClick()" />
+
+</body>
+</html>

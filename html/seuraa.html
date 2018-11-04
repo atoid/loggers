@@ -1,0 +1,209 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+<title>Vallox 110 SE seuranta</title>
+</head>
+
+<!-- -81678-/-307142- -->
+
+<body>
+
+<script src="jquery.min.js"></script>
+<script src="jquery.form.js"></script>
+
+<script type="text/javascript">
+
+var selDate = "";
+var selImage = "temps";
+var selSpan = "day";
+var loadDone = 0;
+
+$(document).ready(function(){
+    $('#divDate').load('date.html', function() {
+      dateUpdate();
+    });
+
+    updateTooltips();
+
+    $("#valloxTab").css("cursor", "pointer");
+    $("#vilpTab").css("cursor", "pointer");
+
+    changeTab(0);
+
+    //$.get("fanmode.txt", function(data){
+    //    var o = findObject("fanSelect");
+    //    o.value = data;
+    //});
+});
+
+function onImgClick()
+{
+   //alert("refresh");
+   //update();
+   //updateTooltips();
+}
+
+function onSpanChange()
+{
+   var o = findObject("spanSelect");
+   selSpan = o.value;
+   //alert(selSpan);
+   //update();
+}
+
+function onFanChange()
+{
+    $('#fanForm').ajaxSubmit(function(res) {
+        alert(res);
+      }
+    );
+}
+
+function findObject(name)
+{
+    return document.getElementById(name);
+}
+
+function update()
+{
+    var url = "/cgi-bin/img.pl?";
+
+    url += "span=" + selSpan;
+
+    if (selDate != "")
+    {
+        url += "&date=" + selDate;
+    }
+
+    url += "&rand=" + Math.random();
+
+    loadDone = 0;
+    $('body').css('cursor', 'wait');
+
+    //alert(url);
+    var o = findObject("kuva1");
+    o.src = url + "&image=temps";
+
+    o = findObject("kuva2");
+    o.src = url + "&image=kwh";
+
+    o = findObject("kuva3");
+    o.src = url + "&image=rh";
+}
+
+function updateTooltips()
+{
+//    $.get("cgi-bin/latest.pl?type=temps", function(data){
+//        var o = findObject("kuva1");
+//        o.title = data;
+//    });
+
+//    $.get("cgi-bin/latest.pl?type=kwh", function(data){
+//        var o = findObject("kuva2");
+//        o.title = data;
+//    });
+
+//    $.get("cgi-bin/latest.pl?type=rh", function(data){
+//        var o = findObject("kuva3");
+//        o.title = data;
+//    });
+}
+
+function getDateStr(date)
+{
+    var str = "";
+    str += date.getFullYear() + "-";
+    v = date.getMonth()+1;
+    if (v < 10) str += "0";
+    str += v + "-";
+    var v = date.getDate();
+    if (v < 10) str += "0";
+    str += v;
+    return str; 
+}
+
+function onButton(id, newDate)
+{
+    var curDate = new Date();
+    if (newDate > curDate)
+    {
+        selDate = getDateStr(curDate);
+    }
+    else
+    {
+        selDate = getDateStr(newDate);
+    }
+
+    update();
+}
+
+function onImgLoad(id)
+{
+    loadDone |= id;
+
+    if (loadDone == 7)
+    {
+        $('body').css('cursor', 'auto');
+    }
+}
+
+var currentTab = 0;
+
+function changeTab(tab)
+{
+    if (tab == 0)
+    {
+        $("#valloxTab").css("font-weight", "bold");
+        $("#vilpTab").css("font-weight", "normal");
+        $("#vallox").css("display", "block");
+        $("#vilp").css("display", "none");
+        currentTab = 0;
+    }
+    else
+    {
+        $("#valloxTab").css("font-weight", "normal");
+        $("#vilpTab").css("font-weight", "bold");
+        $("#vallox").css("display", "none");
+        $("#vilp").css("display", "block");
+        updateVilp();
+        currentTab = 1;
+    }
+}
+
+function updateVilp()
+{
+    d = new Date();
+    $("#vilpImg1").attr("src", "/temps_4h.png?"+d.getTime());
+    $("#vilpImg2").attr("src", "/temps_24h.png?"+d.getTime());
+}
+
+</script>
+<span id="valloxTab" onclick="changeTab(0);">Vallox 110 SE seuranta</span>
+<span>&nbsp;ja&nbsp;</span>
+<span id="vilpTab" onclick="changeTab(1);">VILP seuranta</span>
+<br>
+<br>
+
+<div id="vallox">
+
+<b>Päivä : </b><div id="divDate" style="display:inline"></div>
+<br>
+<b>Pituus : </b><select id="spanSelect" onchange="onSpanChange()"><option value="day">päivä</option><option value="week">viikko</option><option value="month">kuukausi</option></select>
+<br>
+
+<img onload="onImgLoad(1)" src="temps.png" id="kuva1" onclick="onImgClick()">
+<img onload="onImgLoad(2)" src="kwh.png" id="kuva2" onclick="onImgClick()">
+<img onload="onImgLoad(4)" src="rh.png" id="kuva3" onclick="onImgClick()">
+
+</div>
+
+<div id="vilp" style="display:none">
+
+<img id="vilpImg1" onclick="updateVilp();" style="cursor:pointer;">
+<br>
+<img id="vilpImg2" onclick="updateVilp();" style="cursor:pointer;">
+
+</div>
+
+</body>
+</html>

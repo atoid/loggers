@@ -1,0 +1,127 @@
+<html>
+<body onload="dateUpdate()">
+
+<script type="text/javascript">
+
+function dateUpdate()
+{
+    var myDate = new Date();
+    myDate.setDate(myDate.getDate() - 1);
+
+    var oy = findObject('year');
+    var om = findObject('month');
+    var od = findObject('day');
+
+    var yr = new String(myDate.getFullYear());
+    yr = yr.substr(2,2);
+    var mday = myDate.getDate();
+    var mon = myDate.getMonth() + 1;
+
+    oy.value = yr;
+
+    if (mday < 10)
+    {
+        od.value = '0' + mday;  
+    }
+    else
+    {
+        od.value = mday;
+    }
+
+    if (mon < 10)
+    {
+        om.value = '0' + mon;
+    }
+    else
+    {
+        om.value = mon;
+    }
+}
+
+function getDate()
+{
+    var day = findObject("day");
+    var month = findObject("month");
+    var year = findObject("year");
+
+    var d = new Date(0);
+    d.setDate(day.value);
+    d.setMonth(month.value-1);
+    d.setFullYear('20' + year.value);
+
+    return d;
+}
+
+function onDateButton()
+{
+    onButton("1", getDate());
+}
+
+</script>
+
+<select id="year">
+  <option value="11">2011</option>
+  <option value="12">2012</option>
+  <option value="13">2013</option>
+  <option value="14">2014</option>
+  <option value="15">2015</option>
+  <option value="16">2016</option>
+  <option value="17">2017</option>
+  <option value="18">2018</option>
+  <option value="19">2019</option>
+  <option value="20">2020</option>
+</select>
+
+<select id="month">
+  <option value="01">tammikuu</option>
+  <option value="02">helmikuu</option>
+  <option value="03">maaliskuu</option>
+  <option value="04">huhtikuu</option>
+  <option value="05">toukokuu</option>
+  <option value="06">kesäkuu</option>
+  <option value="07">heinäkuu</option>
+  <option value="08">elokuu</option>
+  <option value="09">syyskuu</option>
+  <option value="10">lokakuu</option>
+  <option value="11">marraskuu</option>
+  <option value="12">joulukuu</option>
+</select>
+
+<select id="day">
+  <option value="01">1</option>
+  <option value="02">2</option>
+  <option value="03">3</option>
+  <option value="04">4</option>
+  <option value="05">5</option>
+  <option value="06">6</option>
+  <option value="07">7</option>
+  <option value="08">8</option>
+  <option value="09">9</option>
+  <option value="10">10</option>
+  <option value="11">11</option>
+  <option value="12">12</option>
+  <option value="13">13</option>
+  <option value="14">14</option>
+  <option value="15">15</option>
+  <option value="16">16</option>
+  <option value="17">17</option>
+  <option value="18">18</option>
+  <option value="19">19</option>
+  <option value="20">20</option>
+  <option value="21">21</option>
+  <option value="22">22</option>
+  <option value="23">23</option>
+  <option value="24">24</option>
+  <option value="25">25</option>
+  <option value="26">26</option>
+  <option value="27">27</option>
+  <option value="28">28</option>
+  <option value="29">29</option>
+  <option value="30">30</option>
+  <option value="31">31</option>
+</select>
+
+<button id="button" type="button" onclick="onDateButton()">Näytä</button>
+
+</body>
+</html>

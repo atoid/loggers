@@ -1,0 +1,190 @@
+<html>
+<head>
+<style>
+
+div.switch-bg {
+    margin-top: 10px;
+    width: 100px;
+    height: 50px;
+    border: 2px solid #000000;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+div.switch-fg {
+    margin-top: 2px;
+    margin-left: 2px;
+    width: 46px;
+    height: 46px;
+    line-height: 46px;
+    background-color: #000000;
+    color: #ff0000;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+div.switches {
+}
+
+div.logs {
+  display: inline-block;
+}
+
+.log-area {
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+</style>
+</head>
+
+<body>
+
+<script src="jquery.min.js"></script>
+
+<script>
+
+var URL_BASE = "http://192.168.0.134/cgi-bin/pyvilp.cgi?";
+
+$( document ).ready(function() {
+    console.log("ready...")
+    onLoadLogs();
+});
+
+function onSwitchClick(e)
+{
+    var sw = $(e).find("div");
+    var func = $(e).data("complete-func");
+    var id = sw.text().trim();
+    
+    if (!func)
+    {
+        func = "onSwitchChange_default";
+    }
+    
+    if (parseInt(sw.css("margin-left")) < 25)
+    {
+        sw.animate({
+            "margin-left": "+51"
+        },
+        100,
+        function() {
+            sw.css("color", "#00ff00");
+            eval(func + "(id, 'on')");
+        });
+    }
+    else
+    {
+        sw.animate({
+            "margin-left": "+2"
+        },
+        100,
+        function() {
+            sw.css("color", "#ff0000");
+            eval(func + "(id, 'off')");
+        });
+    }
+}
+
+function onSwitchChange_default(id, state)
+{
+    console.log("Switch " + id + " is " + state + " (default function)");
+}
+
+
+function onSwitchChange(id, state)
+{
+    console.log("Switch " + id + " is " + state);
+
+    var pass = $("#passwd").val();
+
+    if (pass && pass != "")
+    {
+      $.get(URL_BASE + "relay=" + id + "&password=" + $("#passwd").val() + "&state=" + state,
+        function(res) {
+          console.log("relay command done");
+      });
+    }
+    else
+    {
+      alert("Password cannot be empty!");
+      console.log("password cannot be empty!");
+    }
+}
+
+function onLoadLogs()
+{
+  if ($("input[name='view']:checked").val() == 'logs')
+  {
+    $.get(URL_BASE + "logs=16", function(res) {
+      $("#logs").val(res.logs);
+    }).always(function() {
+      setTimeout(onLoadLogs, 2000);
+    });
+  }
+  else
+  {
+    $.get(URL_BASE, function(res) {
+      $("#logs").val(JSON.stringify(res, null, 3));
+    }).always(function() {
+      setTimeout(onLoadLogs, 2000);
+    });
+  }
+}
+
+</script>
+
+</body>
+
+<br>
+
+<table>
+<tr>
+  <td>
+    <input type="password" id="passwd" size="8">
+  </td>
+  <td>
+    <input type="radio" name="view" value="logs" checked>Logs
+    <input type="radio" name="view" value="state">State
+  </td>
+</tr>
+
+<tr>
+<td>
+<div class="switches">
+
+<div class="switch-bg" onclick="onSwitchClick(this)" data-complete-func="onSwitchChange">
+<div class="switch-fg">ALRM</div>
+</div>
+
+<div class="switch-bg" onclick="onSwitchClick(this)" data-complete-func="onSwitchChange">
+<div class="switch-fg">COMP</div>
+</div>
+
+<div class="switch-bg" onclick="onSwitchClick(this)" data-complete-func="onSwitchChange">
+<div class="switch-fg">FAN</div>
+</div>
+
+<div class="switch-bg" onclick="onSwitchClick(this)" data-complete-func="onSwitchChange">
+<div class="switch-fg">4WAY</div>
+</div>
+
+</div>
+</td>
+
+<td>
+  <div class="logs">
+  <textarea id="logs" class="log-area" rows="17" cols="80"></textarea>
+  </div>
+</td>
+</tr>
+</table>
+
+</body>
+
+</html>
+
